@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+}
+
+enum Category {
+  REACT
+  TYPESCRIPT
+  REST_API
+  GIT
+  DOCKER
+  SQL
+  AI
+  DEVOPS
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  DEBUGGING
+  OPEN
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+}
+
+model Candidate {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  token       String      @unique @default(cuid())
+  status      Status      @default(PENDING)
+  scoreTotal  Int?
+  suspicious  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+  answers     Answer[]
+  evaluation  Evaluation?
+  focusEvents FocusEvent[]
+}
+
+model Question {
+  id             String       @id @default(cuid())
+  category       Category
+  type           QuestionType
+  title          String
+  description    String?
+  snippet        String?
+  options        Json?
+  correctAnswer  String
+  points         Int          @default(10)
+  order          Int
+  createdAt      DateTime     @default(now())
+  answers        Answer[]
+}
+
+model Answer {
+  id              String   @id @default(cuid())
+  candidateId     String
+  questionId      String
+  selectedAnswer  String?
+  textAnswer      String?
+  isCorrect       Boolean?
+  candidate       Candidate @relation(fields: [candidateId], references: [id])
+  question        Question  @relation(fields: [questionId], references: [id])
+
+  @@unique([candidateId, questionId])
+}
+
+model Evaluation {
+  id             String    @id @default(cuid())
+  candidateId    String    @unique
+  scoreTotal     Int?
+  categoryScores Json?
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  candidate      Candidate @relation(fields: [candidateId], references: [id])
+}
+
+model FocusEvent {
+  id          String   @id @default(cuid())
+  candidateId String
+  lostAt      DateTime @default(now())
+  returnedAt  DateTime?
+  durationMs  Int?
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
