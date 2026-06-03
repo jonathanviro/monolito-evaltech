@@ -131,6 +131,11 @@ export class CandidatesService {
       data: { scoreTotal, categoryScores },
     });
 
+    await this.prisma.candidate.update({
+      where: { id: candidateId },
+      data: { scoreTotal },
+    });
+
     return { scoreTotal, categoryScores };
   }
 }
