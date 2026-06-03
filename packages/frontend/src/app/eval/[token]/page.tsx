@@ -335,6 +335,10 @@ export default function EvaluationPage() {
 
   const progress = ((Object.keys(answers).length) / questions.length) * 100;
   const isMultipleChoice = currentQuestion.type === "MULTIPLE_CHOICE" || currentQuestion.type === "DEBUGGING";
+  const currentAnswer = answers[currentQuestion.id];
+  const isAnswered = isMultipleChoice
+    ? !!currentAnswer?.selectedAnswer
+    : !!currentAnswer?.textAnswer?.trim();
 
   return (
     <div className="min-h-screen bg-background">
@@ -439,6 +443,7 @@ export default function EvaluationPage() {
             <Button
               variant="default"
               size="sm"
+              disabled={!isAnswered}
               onClick={async () => {
                 const q = questions[currentIndex];
                 const a = answers[q.id];
@@ -451,7 +456,7 @@ export default function EvaluationPage() {
               Siguiente <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           ) : (
-            <Button size="default" onClick={handleSubmit} disabled={submitting}>
+            <Button size="default" onClick={handleSubmit} disabled={submitting || !isAnswered}>
               {submitting ? "Enviando..." : "Enviar evaluación"}
             </Button>
           )}
